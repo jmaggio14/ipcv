@@ -1,9 +1,10 @@
-#PYTHON 2
+#PYTHON3
 import cv2
-from numpy import unique, amax
+import numpy as np
+from sys import exc_info
 
 
-def quantize(img, levels, qtype='uniform', maxCount=255, displayLevels):
+def quantize(img, levels, qtype="uniform", maxCount=255, displayLevels=None):
 	"""
 	:NAME:
 		quantize
@@ -41,7 +42,7 @@ def quantize(img, levels, qtype='uniform', maxCount=255, displayLevels):
 				  (NOT THE NUMBER OF ACTUAL UNIQUE PIXEL VALUES)
 
 	:RETURN VALUE:
-		result is a quanitized numpy array of the same shape as the input image
+		result is a quanitized np array of the same shape as the input image
 
 	:SIDE EFFECTS:
 		can produce very visible contouring!
@@ -51,20 +52,20 @@ def quantize(img, levels, qtype='uniform', maxCount=255, displayLevels):
 			if incorrect data types are used
 
 	:REQUIRES:
-		numpy
+		np
 		cv2
 
 	:MODIFICATION HISTORY:
 		Engineer:	Jeff Maggio
 		08/25/16:	uniform code
-		08/28/16:	
+		08/28/16:	igs addition
 
 	"""
 	try:
 
 		#ERROR CHECKING
-		if isinstance(img, numpy.ndarray) == False:
-			print( "input 'img' must be a valid numpy.ndarray" )
+		if isinstance(img, np.ndarray) == False:
+			print( "input 'img' must be a valid np.ndarray" )
 			return -1
 		if isinstance(displayLevels,int) == False: #checking to see if displayLevels is an integer
 			print( "input 'displayLevels' must be an integer" )
@@ -72,8 +73,8 @@ def quantize(img, levels, qtype='uniform', maxCount=255, displayLevels):
 		if isinstance(levels,int) == False: #checking to see if levels is an integer
 			print( "input 'levels' must be an integer" )
 			return -1
-		if qtype != "uniform" or "igs":
-			print("input 'qtype' must be a string")
+		if qtype != "uniform" and qtype != "igs":
+			print("input 'qtype' must be one of the following strings: 'uniform' or 'igs'")
 			return -1
 		if displayLevels > ( maxCount + 1 ):
 			print( "input displayLevels cannot be greater than input 'maxCount' ({0})".format( ( maxCount + 1 ) ) )
@@ -83,23 +84,43 @@ def quantize(img, levels, qtype='uniform', maxCount=255, displayLevels):
 			return -1
 
 		#BEGIN QUANTIZATION PROCEDURE
-		divsor = int(displayLevels) // levels
+		divsor = int(displayLevels) / levels
 		if qtype == "uniform":
 			img = (img // divsor) * divsor
+		
+		elif qtype == "igs":			
+			if len(img.shape) > 2:
+				grayScale = False
+				bandRange = img.shape[2]
+			else:
+				grayScale = True
+				bandRange = 1
 
-		elif qtype == "igs":
-			for band in img.shape[2]: #for each color band
-				for row in range(img.rows): #for each row in the band
+			for band in range(bandRange): #for each color band
+				bandImage = img[:,:,0] if ( grayScale == False ) else img
+				
+				for row in range(bandImage.shape[0]): #for each row in the band
 					error = 0
-					for col in range(img.cols): #for each column in the row
-						quantizedPixel = ( img[row,col,band] // divsor ) * divsor
-						if pixel != maxCount: #passes if the value is at it's maximum
-							img[row,col,band] = quantizedPixel + error
-							error = ( img[row,col,band] % levels )
 
+					for col in range(bandImage.shape[1]): #for each column in the row
+						quantizedPixel = ( bandImage[row,col] // divsor ) * divsor
 
-	except Exception as e:
-		print("unable to compute because: {0}").format(e)
+						if ( quantizedPixel + error ) < maxCount: #passes if the value is at it's maximum
+							bandImage[row,col] = quantizedPixel + error
+							error = ( bandImage[row,col] % levels )
+						else:
+							bandImage[row,col] = quantizedPixel
+							error = ( bandImage[row,col] % levels )
+							
+				
+				if grayScale == False:
+					img[:,:,band] = bandImage
+				else:
+					img = bandImage
 
-	img = numpy.array(img,dtype=np.uint8) #converting to a unsigned 8 for display purposes
+		img = np.array(img,dtype=np.uint8) #converting to a unsigned 8 for display purposes
+
+	except Exception as exception:
+		print("unable to compute because: {0} on line {1}".format(exception,exc_info()[-1].tb_lineno))
+
 	return img

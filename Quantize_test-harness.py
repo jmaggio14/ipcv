@@ -1,4 +1,4 @@
-#PYTHON2
+#PYTHON3
 
 if __name__ == '__main__':
 
@@ -21,18 +21,18 @@ if __name__ == '__main__':
   cv2.namedWindow(filename, cv2.WINDOW_AUTOSIZE)
   cv2.imshow(filename, im)
 
+  #UNIFORM TESING
   numberLevels = 7
-  quantizedImage = quantizer.quantize(im,numberLevels,qtype='uniform',displayLevels=256)
-
+  quantizedImage = ipcv.quantize(im,numberLevels,qtype="uniform",displayLevels=256)
   cv2.namedWindow(filename + ' (Uniform Quantization)', cv2.WINDOW_AUTOSIZE)
   cv2.imshow(filename + ' (Uniform Quantization)', quantizedImage)
+  print("uniform image size = " + str(quantizedImage.size))
 
+  #IGS TESTING
   numberLevels = 7
-  quantizedImage = ipcv.quantize(im,
-                                 numberLevels,
-                                 qtype='igs',
-                                 displayLevels=256)
+  quantizedImage = ipcv.quantize(im,numberLevels, qtype="igs", displayLevels=256)
   cv2.namedWindow(filename + ' (IGS Quantization)', cv2.WINDOW_AUTOSIZE)
   cv2.imshow(filename + ' (IGS Quantization)', quantizedImage)
+  print("igs image size = " + str(quantizedImage.size))
 
-  action = flush.flush()
+  action = ipcv.flush()
