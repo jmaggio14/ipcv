@@ -9,8 +9,8 @@ if __name__ == '__main__':
   home = os.path.expanduser('~')
   # filename = home + os.path.sep + 'src/python/examples/data/crowd.jpg'
   # filename = home + os.path.sep + 'src/python/examples/data/redhat.ppm'
-  filename = home + os.path.sep + 'src/python/examples/data/linear.tif'
-  # filename = home + os.path.sep + 'src/python/examples/data/lenna.tif'
+  # filename = home + os.path.sep + 'src/python/examples/data/linear.tif'
+  filename = home + os.path.sep + 'src/python/examples/data/lenna.tif'
 
   im = cv2.imread(filename, cv2.IMREAD_UNCHANGED)
   print('Filename = {0}'.format(filename))
@@ -33,6 +33,7 @@ if __name__ == '__main__':
   quantizedImage = ipcv.quantize(im,numberLevels, qtype="igs", displayLevels=256)
   cv2.namedWindow(filename + ' (IGS Quantization)', cv2.WINDOW_AUTOSIZE)
   cv2.imshow(filename + ' (IGS Quantization)', quantizedImage)
+  cv2.imwrite('igs_quant1.png',quantizedImage)
   print("igs image size = " + str(quantizedImage.size))
 
   action = ipcv.flush()

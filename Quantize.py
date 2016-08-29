@@ -65,62 +65,60 @@ def quantize(img, levels, qtype="uniform", maxCount=255, displayLevels=None):
 
 		#ERROR CHECKING
 		if isinstance(img, np.ndarray) == False:
-			print( "input 'img' must be a valid np.ndarray" )
-			return -1
+			print( "input 'img' must be a valid numpy.ndarray" )
+			raise ValueError
 		if isinstance(displayLevels,int) == False: #checking to see if displayLevels is an integer
 			print( "input 'displayLevels' must be an integer" )
-			return -1
+			raise ValueError
 		if isinstance(levels,int) == False: #checking to see if levels is an integer
 			print( "input 'levels' must be an integer" )
-			return -1
+			raise ValueError
+		if isinstance(maxCount,int) == False:
+			print("input 'maxCount' must be an integer")
+			raise ValueError
+			
 		if qtype != "uniform" and qtype != "igs":
 			print("input 'qtype' must be one of the following strings: 'uniform' or 'igs'")
-			return -1
+			raise ValueError
 		if displayLevels > ( maxCount + 1 ):
-			print( "input displayLevels cannot be greater than input 'maxCount' ({0})".format( ( maxCount + 1 ) ) )
-			return -1
+			print( "input displayLevels cannot be greater than one more than input 'maxCount' ({0})".format( ( maxCount + 1 ) ) )
+			raise ValueError
+		elif displayLevels < 0:
+			print( "input 'displayLevels' cannot be negative, currently is ({0})".format( displayLevels ))
+			raise ValueError
 		if levels > ( displayLevels ):
 			print( "input 'levels' must be smaller than input 'displayLevels' ({0})".format( ( displayLevels ) ) )
-			return -1
+			raise ValueError
+		if maxCount < 0:
+			print( "input 'maxCount' cannot be negative, currently is ({0})".format( maxCount ) )
+			raise ValueError
 
 		#BEGIN QUANTIZATION PROCEDURE
 		divsor = int(displayLevels) / levels
+
 		if qtype == "uniform":
-			img = (img // divsor) * divsor
+			img = (img // divsor)
 		
-		elif qtype == "igs":			
-			if len(img.shape) > 2:
-				grayScale = False
-				bandRange = img.shape[2]
-			else:
-				grayScale = True
-				bandRange = 1
+		elif qtype == "igs":
+			error = 0
+			for pixel in range(img.size): #for each column in the row
 
-			for band in range(bandRange): #for each color band
-				bandImage = img[:,:,0] if ( grayScale == False ) else img
-				
-				for row in range(bandImage.shape[0]): #for each row in the band
-					error = 0
+				pixelValue = img.flat[pixel]
+				quantizedPixel = ( ( pixelValue + error ) // divsor ) 
 
-					for col in range(bandImage.shape[1]): #for each column in the row
-						quantizedPixel = ( bandImage[row,col] // divsor ) * divsor
-
-						if ( quantizedPixel + error ) < maxCount: #passes if the value is at it's maximum
-							bandImage[row,col] = quantizedPixel + error
-							error = ( bandImage[row,col] % levels )
-						else:
-							bandImage[row,col] = quantizedPixel
-							error = ( bandImage[row,col] % levels )
-							
-				
-				if grayScale == False:
-					img[:,:,band] = bandImage
+				if quantizedPixel < maxCount:
+					img.flat[pixel] = quantizedPixel
 				else:
-					img = bandImage
+					img.flat[pixel] = (pixelValue // divsor)
 
-		img = np.array(img,dtype=np.uint8) #converting to a unsigned 8 for display purposes
+				error = (pixelValue + error) % divsor
+
+		print(img.dtype)
+		img = int(divsor) * img.astype(np.uint8) #converting to a unsigned 8 for display purposes
 
 	except Exception as exception:
+		print("----------------------------------------------")
 		print("unable to compute because: {0} on line {1}".format(exception,exc_info()[-1].tb_lineno))
+		print("----------------------------------------------")
 
 	return img
