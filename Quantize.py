@@ -76,7 +76,6 @@ def quantize(img, levels, qtype="uniform", maxCount=255, displayLevels=None):
 		if isinstance(maxCount,int) == False:
 			print("input 'maxCount' must be an integer")
 			raise ValueError
-			
 		if qtype != "uniform" and qtype != "igs":
 			print("input 'qtype' must be one of the following strings: 'uniform' or 'igs'")
 			raise ValueError
@@ -94,27 +93,26 @@ def quantize(img, levels, qtype="uniform", maxCount=255, displayLevels=None):
 			raise ValueError
 
 		#BEGIN QUANTIZATION PROCEDURE
-		divsor = int(displayLevels) / levels
+		divisor = int(displayLevels) / levels
 
 		if qtype == "uniform":
-			img = (img // divsor)
+			img = (img // divisor)
 		
 		elif qtype == "igs":
 			error = 0
 			for pixel in range(img.size): #for each column in the row
 
 				pixelValue = img.flat[pixel]
-				quantizedPixel = ( ( pixelValue + error ) // divsor ) 
 
-				if quantizedPixel < maxCount:
-					img.flat[pixel] = quantizedPixel
+				if ( pixelValue + error ) < maxCount:
+					img.flat[pixel] = ( ( pixelValue + error ) // divisor ) 
 				else:
-					img.flat[pixel] = (pixelValue // divsor)
+					img.flat[pixel] = (pixelValue // divisor)
 
-				error = (pixelValue + error) % divsor
+				error = (pixelValue + error) % divisor
 
 		print(img.dtype)
-		img = int(divsor) * img.astype(np.uint8) #converting to a unsigned 8 for display purposes
+		img = int(divisor) * img.astype(np.uint8) #converting to a unsigned 8 for display purposes
 
 	except Exception as exception:
 		print("----------------------------------------------")
