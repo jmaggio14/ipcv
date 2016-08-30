@@ -1,2 +1,2 @@
-from .Quantize import quantize
-from .Flush import flush
+from .quantize import quantize
+from .flush import flush
