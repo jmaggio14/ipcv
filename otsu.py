@@ -3,8 +3,53 @@ from sys import exc_info
 from os.path import split
 import ipcv
 
-def otsu_threshold(img, maxCount=255, verbose=False, discriminant = 'eta'):
-	
+def otsu_threshold(img, maxCount=255, verbose=False):
+"""
+	:NAME:
+		otsu_threshold
+
+	:PURPOSE:
+		this method generates a binary thresholded image based off of 
+
+	:CATEGORY:
+		ipcv -- object recognition and thresholding tool
+
+	:CALLING SEQUENCE:
+		quantizedImage = quantize(img = inputImage,\
+								 maxCount = max display level\
+								 verbose = true or false)
+
+	:INPUTS:
+		img
+			[numpy.ndarray]	input image to be quanitized
+		maxCount
+			[int] maximum pixel value in the output array
+		verbose
+			[boolean] whether or not to graph the histogram 
+				  (NOT THE NUMBER OF ACTUAL UNIQUE PIXEL VALUES)
+
+	:RETURN VALUE:
+		tuple containing:
+			returnTuple[0] -- binary numpy.array of the same shape as the input image
+			returnTuple[1] -- threshold determined by otsu's method
+
+
+	:ERROR CHECKING:
+		TypeError
+		ValueError
+		RuntimeError
+
+	:REQUIRES:
+		np
+		sys.exc_info
+		os.path.split
+		ipcv
+
+	:MODIFICATION HISTORY:
+		Engineer:	Jeff Maggio
+		08/25/16:	otsu code
+
+	"""
 #######################  BEGIN ERROR CHECKING  #######################
 	if isinstance(img,np.ndarray) == True:
 		dims = ipcv.dimensions(img,"dictionary")
