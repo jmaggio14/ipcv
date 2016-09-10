@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def histogram(img,channels=[0],histSize=[256],mask=None,ranges=[0,256],returnType=1):
+def histogram(img,channels=0,histSize=256,mask=None,ranges=[0,256],returnType=1):
 	"""
 	:NAME:
 		histogram
@@ -69,13 +69,16 @@ def histogram(img,channels=[0],histSize=[256],mask=None,ranges=[0,256],returnTyp
 	try: 
 
 
-		histogram = cv2.calcHist([img],channels=channels,mask=mask,histSize=histSize,ranges=ranges)
+		histogram = cv2.calcHist([img],channels=[channels],mask=mask,histSize=[histSize],ranges=ranges)
 		pdf = histogram / img.size
-		cdf = np.cumsum(pdf); cdf = np.reshape(cdf,histogram.shape)
+		cdf = np.cumsum(pdf)
 		if returnType == 0: # return all arrays in one numpy.ndarray
+			cdf = np.reshape(cdf,histogram.shape)
 			hpc = np.hstack((histogram,pdf,cdf))
 			return hpc
 		elif returnType == 1: # return all arrays sequentially
+			histogram = histogram.flatten()
+			pdf = pdf.flatten()
 			return histogram,pdf,cdf
 
 

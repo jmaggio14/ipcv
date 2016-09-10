@@ -67,7 +67,6 @@ def histogram_enhancement(img, etype='linear2', target=None, maxCount=255, pool 
 
 	#ERROR CHECKING
 	if etype == "match":
-		print("checking if target is ")
 		if (isinstance(target,np.ndarray) == False):
 			print("-------------------------------------------------------------------")
 			print("input 'target' must by a valid numpy.ndarray, currently {0}".format(type(target)))
@@ -109,7 +108,7 @@ def histogram_enhancement(img, etype='linear2', target=None, maxCount=255, pool 
 	    	for band in range(bands):
 
 	    		#cdf is recalculated by band
-	    		cdf = ipcv.histogram(img=img,channels=[band],histSize=[maxCount+1],\
+	    		cdf = ipcv.histogram(img=img,channels=band,histSize=(maxCount+1),\
 		    		ranges=[0,maxCount+1],returnType=1)[2]
 
 		    	# generating components of the line
@@ -131,7 +130,7 @@ def histogram_enhancement(img, etype='linear2', target=None, maxCount=255, pool 
 	    elif etype == 'equalize':
 
 	    	for band in range(bands):
-	    		cdf = ipcv.histogram(img=img,channels=[band],histSize=[maxCount+1],\
+	    		cdf = ipcv.histogram(img=img,channels=band,histSize=(maxCount+1),\
 		    		ranges=[0,maxCount+1],returnType=1)[2]
 
 		    	LUT = (cdf * maxCount).flatten()
@@ -148,13 +147,13 @@ def histogram_enhancement(img, etype='linear2', target=None, maxCount=255, pool 
 		    		tCdf.append( np.cumsum(target) )
 	    	else:
 	    		for band in range(bands):
-		    		tCdf.append(ipcv.histogram(img=target,channels=[band],histSize=[maxCount+1],\
+		    		tCdf.append(ipcv.histogram(img=target,channels=band,histSize=(maxCount+1),\
 			    		ranges=[0,maxCount+1],returnType=1)[2]) #only return the cdf here
 
 
 
 	    	for band in range(bands):
-	    		cdf = ipcv.histogram(img=img,channels=[band],histSize=[maxCount+1],\
+	    		cdf = ipcv.histogram(img=img,channels=band,histSize=(maxCount+1),\
 		    		ranges=[0,maxCount+1],returnType=1)[2]
 
 		    	LUT = np.zeros(maxCount+1)
