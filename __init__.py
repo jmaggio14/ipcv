@@ -3,4 +3,4 @@ from .flush import flush
 from .histogram import histogram
 from .histogram_enhancement import histogram_enhancement
 from .dimensions import dimensions
-
+from .otsu import otsu_threshold
