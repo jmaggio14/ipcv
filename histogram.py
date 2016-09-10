@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def histogram(img,channels=[0],histSize=[256],mask=None,ranges=[0,256],returnType=0):
+def histogram(img,channels=[0],histSize=[256],mask=None,ranges=[0,256],returnType=1):
 	"""
 	:NAME:
 		histogram
@@ -47,8 +47,6 @@ def histogram(img,channels=[0],histSize=[256],mask=None,ranges=[0,256],returnTyp
 
 	:RETURN VALUE:
 		a numpy array containing 
-	:SIDE EFFECTS:
-		can produce very visible contouring!
 
 	:ERROR CHECKING:
 		ValueError
@@ -69,6 +67,8 @@ def histogram(img,channels=[0],histSize=[256],mask=None,ranges=[0,256],returnTyp
 
 
 	try: 
+
+
 		histogram = cv2.calcHist([img],channels=channels,mask=mask,histSize=histSize,ranges=ranges)
 		pdf = histogram / img.size
 		cdf = np.cumsum(pdf); cdf = np.reshape(cdf,histogram.shape)
@@ -77,6 +77,9 @@ def histogram(img,channels=[0],histSize=[256],mask=None,ranges=[0,256],returnTyp
 			return hpc
 		elif returnType == 1: # return all arrays sequentially
 			return histogram,pdf,cdf
+
+
+			
 
 	except Exception as e:
 		print("-------------------------------------------------------------------")
