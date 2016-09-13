@@ -68,7 +68,6 @@ def histogram(img,channels=0,histSize=256,mask=None,ranges=[0,256],returnType=1)
 
 	try: 
 
-
 		histogram = cv2.calcHist([img],channels=[channels],mask=mask,histSize=[histSize],ranges=ranges)
 		pdf = histogram / img.size
 		cdf = np.cumsum(pdf)
@@ -98,8 +97,8 @@ def histogram(img,channels=0,histSize=256,mask=None,ranges=[0,256],returnType=1)
 			print("input 'img' must either be np.uint8 or np.float32")
 			print("currently is {0}".format(img.dtype))
 		#Error checking channels
-		if isinstance(channels, list) == False:
-			print("input 'channels' must be a python list")
+		if isinstance(channels, int) == False:
+			print("input 'channels' must be a integer")
 			print("currently is {0}".format(type(channels)))
 		#error checking Mask
 		if isinstance(mask, np.ndarray) == False and isinstance(mask, type(None)) == False:
