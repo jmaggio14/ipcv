@@ -159,7 +159,7 @@ if __name__ == '__main__':
 	 print('Image size = {0}'.format(im.size))
 
 	 startTime = time.time()
-	 thresholdedImage, threshold = ipcv.otsu_threshold(im, verbose=False)
+	 thresholdedImage, threshold = ipcv.otsu_threshold(im, verbose=True)
 	 print('Elapsed time = {0} [s]'.format(time.time() - startTime))
 
 	 print('Threshold = {0}'.format(threshold))

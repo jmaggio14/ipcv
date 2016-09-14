@@ -88,7 +88,7 @@ def quickplot(values,colors,labels=None,filename=None,display=True,save=False,\
 		return plt
 
 	except Exception as e:
-		print("===============================================================")
+		print("===============================================================") 		
 		exc_type, exc_obj, tb = ipcv.debug()
 		fname = ipcv.debugParser(tb.tb_frame.f_code.co_filename)[1]
 		print("\r\nfile: {0}\r\n\r\nline: {1} \r\n\r\n{2}\r\n".format(fname,tb.tb_lineno,e))
