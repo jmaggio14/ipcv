@@ -50,47 +50,47 @@ def otsu_threshold(img, maxCount=255, verbose=False):
 		08/25/16:	otsu code
 
 	"""
-#######################  BEGIN ERROR CHECKING  #######################
-	# if isinstance(img,np.ndarray) == True:
-	# 	dims = ipcv.dimensions(img,"dictionary")
+######################  BEGIN ERROR CHECKING  #######################
+	if isinstance(img,np.ndarray) == True:
+		dims = ipcv.dimensions(img,"dictionary")
 
-	# 	if dims["bands"] == 1:
+		if dims["bands"] == 1:
 
-	# 		if len(img.shape) == 3:
-	# 			#making the array two dimensional if it only has 1 band 
-	# 			img = img.reshape(dims['rows'],dims['cols'])
+			if len(img.shape) == 3:
+				#making the array two dimensional if it only has 1 band 
+				img = img.reshape(dims['rows'],dims['cols'])
 
-	# 	else:
-	# 		print("")
-	# 		print("input 'img' must be grayscale or single-banded")
-	# 		print("")
-	# 		raise RuntimeError
+		else:
+			print("")
+			print("input 'img' must be grayscale or single-banded")
+			print("")
+			raise RuntimeError
 
-	# else:
-	# 	print("")
-	# 	print("input 'img' must be a valid 2 dimensional numpy array, currently {0}".format(type(img)))
-	# 	print("")
-	# 	raise TypeError
+	else:
+		print("")
+		print("input 'img' must be a valid 2 dimensional numpy array, currently {0}".format(type(img)))
+		print("")
+		raise TypeError
 
-	# if isinstance(maxCount,int) == False:
-	# 	print("")
-	# 	print("input 'maxCount' must be an int, currently {0}".format(type(maxCount)))
-	# 	print("")
-	# 	raise TypeError
-	# elif maxCount <= 0:
-	# 	print("")
-	# 	print("input 'maxCount' must be greater than zero")
-	# 	print("")
-	# 	raise ValueError
+	if isinstance(maxCount,int) == False:
+		print("")
+		print("input 'maxCount' must be an int, currently {0}".format(type(maxCount)))
+		print("")
+		raise TypeError
+	elif maxCount <= 0:
+		print("")
+		print("input 'maxCount' must be greater than zero")
+		print("")
+		raise ValueError
 
-	# if isinstance(verbose,bool) == False:
-	# 	print("")
-	# 	print("input 'verbose' must be integer boolean , currently {0}".format(verbose))
-	# 	print("")
-	# 	raise TypeError
+	if isinstance(verbose,bool) == False:
+		print("")
+		print("input 'verbose' must be integer boolean , currently {0}".format(verbose))
+		print("")
+		raise TypeError
 
 
-#######################  END ERROR CHECKING  #######################
+######################  END ERROR CHECKING  #######################
 
 	try:
 

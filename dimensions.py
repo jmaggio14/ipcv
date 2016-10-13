@@ -1,4 +1,4 @@
-def dimensions(im,returnType = "tuple"):
+def dimensions(im,returnType = "dict"):
 	dimensions = im.shape
 	numberRows = dimensions[0]
 	numberColumns = dimensions[1]
@@ -8,8 +8,8 @@ def dimensions(im,returnType = "tuple"):
 		numberBands = 1
 	dataType = im.dtype
 
-	if returnType == "tuple":
+	if returnType == ["tuple","t"]:
 		return numberRows, numberColumns, numberBands, dataType
-	elif returnType == "dictionary":
+	elif returnType in ["dictionary","dict","d"]:
 		return {"rows":numberRows,"cols":numberColumns,"bands":numberBands,"dtype":dataType}
 

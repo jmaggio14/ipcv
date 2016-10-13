@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 import ipcv
+import numpy as np
 
 def quickplot(values,colors,labels=None,filename=None,display=True,save=False,\
 						xLimits=(0,255),verticalMarkers = None, horizontalMarkers = None,\
 						xLabel = None,yLabel=None):
 	# ERROR CHECKING
-	if isinstance(values,tuple) == False:
-		print("\r\ninput 'values' must be a tuple currently {0}\r\n".format(type(values)))
+	if isinstance(values,(tuple,np.ndarray)) == False:
+		print("\r\ninput 'values' must be a tuple or structured numpy array currently {0}\r\n".format(type(values)))
 		raise TypeError
 	if isinstance(colors,tuple) == False:
 		print("\r\ninput 'colors' must be a tuple currently {0}\r\n".format(type(colors)))
@@ -34,6 +35,8 @@ def quickplot(values,colors,labels=None,filename=None,display=True,save=False,\
 		raise TypeError
 	
 	try:
+		#THIS IS TERRIBLE CODING AND NEEDS TO BE FIXED AT SOME POINT
+		# if sArray == False:
 
 		if isinstance(labels,type(None)):
 			numberPlots = len(colors)
@@ -88,11 +91,6 @@ def quickplot(values,colors,labels=None,filename=None,display=True,save=False,\
 		return plt
 
 	except Exception as e:
-		print("===============================================================") 		
-		exc_type, exc_obj, tb = ipcv.debug()
-		fname = ipcv.debugParser(tb.tb_frame.f_code.co_filename)[1]
-		print("\r\nfile: {0}\r\n\r\nline: {1} \r\n\r\n{2}\r\n".format(fname,tb.tb_lineno,e))
-		print("===============================================================")
-
+		ipcv.debug(e)
 
 
