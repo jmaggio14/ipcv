@@ -160,3 +160,4 @@ if __name__ == '__main__':
   	print("igs image size = " + str(quantizedImage.size))
 
   	action = ipcv.flush()
+>>>>>>> ca99de85acec79d98fb85380a963e80d5e39ab1f
