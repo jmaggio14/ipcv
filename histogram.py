@@ -127,5 +127,4 @@ if __name__ == "__main__":
 	legendList = ['histogram','pdf','cdf']
 	for i in [1,2]:
 		plt.plot(hpc[:,i], label = legendList)
->>>>>>> ca99de85acec79d98fb85380a963e80d5e39ab1f
 	plt.show()
