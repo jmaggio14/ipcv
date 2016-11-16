@@ -5,10 +5,10 @@ from .histogram_enhancement import histogram_enhancement
 from .dimensions import dimensions
 from .otsu import otsu_threshold
 from .quickplot import quickplot
-from .debug import debug
+from .debug import debug,type_check,value_check
 from constants import *
 from .map_rotation_scale import map_rotation_scale
 from .points import PointsSelected
 from .map_quad_to_quad import map_quad_to_quad
 from .filter2D import filter2D
-from error_check import type_check,value_check 
+from .fast import fast
