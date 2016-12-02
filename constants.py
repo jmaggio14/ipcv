@@ -1,4 +1,5 @@
 import numpy
+import math
 
 # Remapping interpolation types
 INTER_NEAREST = 0   # Nearest-neighbor interpolation
@@ -20,7 +21,15 @@ IPCV_16S = numpy.int16     # 16-bit signed int
 IPCV_32S = numpy.int32     # 32-bit signed int
 IPCV_32F = numpy.float32   # 32-bit float (single precision)
 IPCV_64F = numpy.float64   # 64-bit float (double precision)
-IPCV_TYPES = (IPCV_8U,IPCV_8S,IPCV_16U,IPCV_16S,IPCV_32S,IPCV_32F,IPCV_64F)
+IPCV_64C = numpy.complex64
+IPCV_128C = numpy.complex128
+IPCV_TYPES = (IPCV_8U,IPCV_8S,IPCV_16U,IPCV_16S,IPCV_32S,IPCV_32F,IPCV_64F,IPCV_64C,IPCV_128C)
+
+# Universal Constants
+IPCV_pi = math.pi
+IPCV_e = math.e
+
+
 # Frequency filter shapes
 IPCV_IDEAL = 0         # Ideal
 IPCV_BUTTERWORTH = 1   # Butterworth

@@ -1,5 +1,10 @@
 def harris(src, sigma=1, k=0.04):
 
+	dxArray = np.asarray([0,0,0],
+						 [-1,0,1],
+						 [0,0,0])
+	dyArray = np.asarray()
+
 
 if __name__ == '__main__':
 

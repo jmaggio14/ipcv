@@ -112,7 +112,7 @@ def histogram_enhancement(img, etype='linear2', target=None, maxCount=255, pool 
 		    		ranges=[0,maxCount+1],returnType=1)[2]
 
 		    	# generating components of the line
-		    	lowerBound = (float(etype.replace("linear","") ) / 200.0)
+		    	lowerBound = (float(etype.replace("linear","") ) / 200.0) #1/2 input on each side
 		    	upperbound = ( 1 - lowerBound )
 		    	dcLow = np.where(cdf >= lowerBound)[0][0]
 		    	dcHigh = np.where(cdf <= upperbound)[0][-1]
@@ -196,15 +196,15 @@ if __name__ == '__main__':
 	home = os.path.expanduser('~')
 	# filename = home + os.path.sep + 'src/python/examples/data/redhat.ppm'
 	# filename = home + os.path.sep + 'src/python/examples/data/crowd.jpg'
-	# filename = home + os.path.sep + 'src/python/examples/data/lenna.tif'
+	filename = home + os.path.sep + 'src/python/examples/data/lenna.tif'
 	# filename = home + os.path.sep + 'src/python/examples/data/lenna_color.tif'
-	filename = home + os.path.sep + 'src/python/examples/data/giza.jpg'
+	# filename = home + os.path.sep + 'src/python/examples/data/giza.jpg'
 
 	# matchFilename = home + os.path.sep + 'src/python/examples/data/giza.jpg'
 	# matchFilename = home + os.path.sep + 'src/python/examples/data/lenna.tif'
 	# matchFilename = home + os.path.sep + 'src/python/examples/data/lenna_color.tif'
 	# matchFilename = home + os.path.sep + 'src/python/examples/data/redhat.ppm'
-	matchFilename = home + os.path.sep + 'src/python/examples/data/crowd.jpg'
+	# matchFilename = home + os.path.sep + 'src/python/examples/data/crowd.jpg'
 
 	im = cv2.imread(filename, cv2.IMREAD_UNCHANGED)
 	print('Filename = {0}'.format(filename))
@@ -215,43 +215,43 @@ if __name__ == '__main__':
 	cv2.namedWindow(filename, cv2.WINDOW_AUTOSIZE)
 	cv2.imshow(filename, im)
 
-	print('Linear 2% ...')
-	startTime = time.time()
-	enhancedImage = ipcv.histogram_enhancement(im, etype='linear2')
-	print('Elapsed time = {0} [s]'.format(time.time() - startTime))
-	cv2.namedWindow(filename + ' (Linear 2%)', cv2.WINDOW_AUTOSIZE)
-	cv2.imshow(filename + ' (Linear 2%)', enhancedImage)
+	# print('Linear 2% ...')
+	# startTime = time.time()
+	# enhancedImage = ipcv.histogram_enhancement(im, etype='linear2')
+	# print('Elapsed time = {0} [s]'.format(time.time() - startTime))
+	# cv2.namedWindow(filename + ' (Linear 2%)', cv2.WINDOW_AUTOSIZE)
+	# cv2.imshow(filename + ' (Linear 2%)', enhancedImage)
 
-	print('Linear 1% ...')
-	startTime = time.time()
-	enhancedImage = ipcv.histogram_enhancement(im, etype='linear1')
-	print('Elapsed time = {0} [s]'.format(time.time() - startTime))
-	cv2.namedWindow(filename + ' (Linear 1%)', cv2.WINDOW_AUTOSIZE)
-	cv2.imshow(filename + ' (Linear 1%)', enhancedImage)
+	# print('Linear 1% ...')
+	# startTime = time.time()
+	# enhancedImage = ipcv.histogram_enhancement(im, etype='linear1')
+	# print('Elapsed time = {0} [s]'.format(time.time() - startTime))
+	# cv2.namedWindow(filename + ' (Linear 1%)', cv2.WINDOW_AUTOSIZE)
+	# cv2.imshow(filename + ' (Linear 1%)', enhancedImage)
 
-	print('Equalized ...')
-	startTime = time.time()
-	enhancedImage = ipcv.histogram_enhancement(im, etype='equalize')
-	print('Elapsed time = {0} [s]'.format(time.time() - startTime))
-	cv2.namedWindow(filename + ' (Equalized)', cv2.WINDOW_AUTOSIZE)
-	cv2.imshow(filename + ' (Equalized)', enhancedImage)
+	# print('Equalized ...')
+	# startTime = time.time()
+	# enhancedImage = ipcv.histogram_enhancement(im, etype='equalize')
+	# print('Elapsed time = {0} [s]'.format(time.time() - startTime))
+	# cv2.namedWindow(filename + ' (Equalized)', cv2.WINDOW_AUTOSIZE)
+	# cv2.imshow(filename + ' (Equalized)', enhancedImage)
 
-	tgtIm = cv2.imread(matchFilename, cv2.IMREAD_UNCHANGED)
-	print('Matched (Image) ...')
-	startTime = time.time()
-	enhancedImage = ipcv.histogram_enhancement(im, etype='match', target=tgtIm)
-	print('Elapsed time = {0} [s]'.format(time.time() - startTime))
-	cv2.namedWindow(filename + ' (Matched - Image)', cv2.WINDOW_AUTOSIZE)
-	cv2.imshow(filename + ' (Matched - Image)', enhancedImage)
+	# tgtIm = cv2.imread(matchFilename, cv2.IMREAD_UNCHANGED)
+	# print('Matched (Image) ...')
+	# startTime = time.time()
+	# enhancedImage = ipcv.histogram_enhancement(im, etype='match', target=tgtIm)
+	# print('Elapsed time = {0} [s]'.format(time.time() - startTime))
+	# cv2.namedWindow(filename + ' (Matched - Image)', cv2.WINDOW_AUTOSIZE)
+	# cv2.imshow(filename + ' (Matched - Image)', enhancedImage)
 
 
-	tgtPDF = np.ones(256) / 256
-	print('Matched (Distribution) ...')
-	startTime = time.time()
-	enhancedImage = ipcv.histogram_enhancement(im, etype='match', target=tgtPDF)
-	print('Elapsed time = {0} [s]'.format(time.time() - startTime))
-	cv2.namedWindow(filename + ' (Matched - Distribution)', cv2.WINDOW_AUTOSIZE)
-	cv2.imshow(filename + ' (Matched - Distribution)', enhancedImage)
+	# tgtPDF = np.ones(256) / 256
+	# print('Matched (Distribution) ...')
+	# startTime = time.time()
+	# enhancedImage = ipcv.histogram_enhancement(im, etype='match', target=tgtPDF)
+	# print('Elapsed time = {0} [s]'.format(time.time() - startTime))
+	# cv2.namedWindow(filename + ' (Matched - Distribution)', cv2.WINDOW_AUTOSIZE)
+	# cv2.imshow(filename + ' (Matched - Distribution)', enhancedImage)
 
 
 

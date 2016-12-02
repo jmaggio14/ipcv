@@ -12,10 +12,8 @@ def fast(src, differenceThreshold=50, contiguousThreshold=12, nonMaximalSuppress
 				  [0,3],[-1,3],[-2,2],[-3,1] ]
 	dims = ipcv.dimensions(img,'dict')
 	
-	posArray = np.ones( (dims["rows"], dims["cols"], contiguousThreshold) )
-
 	allCorners = np.zeros(img.shape)
-	output = allCorners.copy()
+	maximaSum = allCorners
 	points = np.zeros( (dims["rows"], dims["cols"], circumference) )
 	unchanged = np.zeros( (dims["rows"], dims["cols"], circumference))
 
@@ -27,16 +25,23 @@ def fast(src, differenceThreshold=50, contiguousThreshold=12, nonMaximalSuppress
 	lessThan = ( (points - unchanged) > differenceThreshold )
 
 	for band in range(circumference):
-		posOverlap = greaterThan[:,:,0:contiguousThreshold] == posArray
-		negOverlap = lessThan[:,:,0:contiguousThreshold] == posArray
-		posCornerCheck = np.sum(posOverlap,axis=2)
+		posOverlap = greaterThan[:,:,0:contiguousThreshold] == 1
+		negOverlap = lessThan[:,:,0:contiguousThreshold] == 1
+		posCornerCheck = np.sum(posOverlap,axis=2)	
 		negCornerCheck = np.sum(negOverlap,axis=2)
 
-		allCorners[np.where(posCornerCheck >= contiguousThreshold-1)] = 1
-		allCorners[np.where(negCornerCheck >= contiguousThreshold-1)] = 1
+		allCorners[np.where(posCornerCheck >= contiguousThreshold)] = 1
+		allCorners[np.where(negCornerCheck >= contiguousThreshold)] = 1
 
+
+		maximaSum = maximaSum + allCorners
 		greaterThan = np.roll(greaterThan,1,axis=2)
 		lessThan = np.roll(lessThan,1,axis=2)
+
+	# if nonMaximalSuppression:
+	# 	firstDerivative = np.gradient(maximaSum)
+	# 	secondDerivative = np.gradient(maximaSum)
+
 
 	finalCorners = np.clip(allCorners,0,1).astype(ipcv.IPCV_8U)
 	return finalCorners
@@ -67,12 +72,13 @@ if __name__ == '__main__':
 			              nonMaximalSuppression=True)
 	print('Elapsed time = {0} [s]'.format(time.time() - startTime))
 
-	cv2.imshow('test',dst*255)
+	cv2.imshow('raw corners',dst*255)
 	cv2.namedWindow(filename, cv2.WINDOW_AUTOSIZE)
 	cv2.imshow(filename, src)
 
 	if len(src.shape) == 2:
 		annotatedImage = cv2.merge((src, src, src))
+		annotatedImage[dst == 1] = [0,0,255]
 	else:
 		annotatedImage = src
 		annotatedImage[dst == 1] = [0,0,255]
