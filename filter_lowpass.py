@@ -63,13 +63,13 @@ if __name__ == '__main__':
 	# frequencyFilter = ipcv.filter_lowpass(im,
 	#                                    16,
 	#                                    filterShape=ipcv.IPCV_IDEAL)
-	# frequencyFilter = ipcv.filter_lowpass(im,
-	#                                    16,
-	#                                    order=1,
-	#                                    filterShape=ipcv.IPCV_BUTTERWORTH)
 	frequencyFilter = ipcv.filter_lowpass(im,
 	                                   16,
-	                                   filterShape=ipcv.IPCV_GAUSSIAN)
+	                                   order=4,
+	                                   filterShape=ipcv.IPCV_BUTTERWORTH)
+	# frequencyFilter = ipcv.filter_lowpass(im,
+	#                                    16,
+	#                                    filterShape=ipcv.IPCV_GAUSSIAN)
 
 	# Create a 3D plot and image visualization of the frequency domain filter
 	rows = im.shape[0]
