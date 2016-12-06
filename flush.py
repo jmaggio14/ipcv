@@ -13,6 +13,13 @@ def flush():
          print('Exiting ...')
          break
 
+      #p is pressed
+      if k == 112 or k == (65536 + 112):
+         action = 'pause'
+         print('Paused ...')
+         print("press 'P' to continue")
+         break
+
       # c or C pressed
       if k == 99 or k == (65536 + 99) or k == 67 or k == (65536 + 67):
          action = 'continue'
