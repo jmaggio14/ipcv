@@ -9,12 +9,24 @@ def fft_display(img, videoFilename=None):
 
 		dims = ipcv.dimensions(img)
 		r,c = dims["rows"],dims["cols"]
-		temp = np.zeros( (r,c) ).astype(ipcv.IPCV_8U)
+		temp = np.zeros( (r,c) )
 
 		# generating FFT
 		# FFT = np.fft.fftshift(np.fft.fft(img))
-		FFT = np.fft.fft(img)
-		logFFT = np.abs( FFT ).astype(ipcv.IPCV_8U)
+		# FFT = np.fft.fftshift( np.fft.fft2(img) )
+		# logFFT = np.log( np.abs( FFT / np.sqrt(FFT.size) ) ).astype(ipcv.IPCV_8U)
+
+		FFT = np.fft.fft2(img)
+		# print("AVERAGE VALUE IS EQUAL TO:",FFT.flat[0])
+		FFT = np.fft.fftshift( FFT )
+		FFT = np.abs( FFT )
+		logFFT = np.log10( FFT )
+		logFFT = ( logFFT / np.max(logFFT) ) * 255
+
+
+		print("MAX IS EQUAL TO:",np.max(logFFT))
+		print("MIN IS EQUAL TO:",np.min(logFFT))
+
 
 		# creating array to poulate with maximum values
 		maximumValues = np.flipud( np.argsort( logFFT.flatten() ) )
@@ -35,11 +47,16 @@ def fft_display(img, videoFilename=None):
 
 			# returning the spatial sine wave for freq
 			temp.flat[freqIndex] = logFFT.flat[freqIndex]
-			current = np.fft.ifft( temp ).astype(ipcv.IPCV_8U)
+			current = np.fft.ifft2( temp )
 			temp.flat[freqIndex] = 0
 
+
+			print("MAX IS EQUAL TO:",np.max(current))
+			print("MIN IS EQUAL TO:",np.min(current))
+			
+
 			#scaling the current
-			currentScaled = ( current - np.min(current) ) * 255
+			currentScaled = ( (current - np.min(current) ) / np.max(current) ) * 255
 
 			#summing up all the freq
 			summed = summed + current
@@ -70,7 +87,7 @@ def fft_display(img, videoFilename=None):
 		ipcv.debug(e)
 
 def create_video_writer(imgShape,videoFilename):
-	codec = cv2.VideoWriter_fourcc('M','P','E','G')
+	codec = cv2.VideoWriter_fourcc('M', 'P', 'E', 'G')
 	fps = 30
 	isColor = True
 	videoShape = ( imgShape[1],imgShape[0] )
@@ -90,7 +107,7 @@ def stich(img,logFFT,used,current,currentScaled,summed):
 	# stiching together bottom
 	bottom = np.hstack( (current,currentScaled,summed) )
 	# final collage
-	final = np.vstack( (top,bottom) )
+	final = np.vstack( (top,bottom) ).astype(ipcv.IPCV_8U)
 	return final
 
 
@@ -105,6 +122,8 @@ if __name__ == '__main__':
 	filename = home + os.path.sep + 'src/python/examples/data/lenna.tif'
 
 	im = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+
+	print("AVERAGE IS EQUAL TO: ",np.mean(im))
 	if im is None:
 		print('ERROR: Specified file did not contain a valid image type.')
 		sys.exit(1)
