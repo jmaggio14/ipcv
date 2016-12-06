@@ -19,3 +19,4 @@ from .filter_bandpass import filter_bandpass
 from .filter_notchreject import filter_notchreject
 from .filter_notchpass import filter_notchpass
 from .frequency_filter import frequency_filter
+from fft_display import fft_display
