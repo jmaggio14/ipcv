@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
 	frequencyFilter = ipcv.filter_lowpass(im, 
 	                                      16, 
-	                                      filterShape=ipcv.IPCV_GAUSSIAN)
+	                                      filterShape=ipcv.IPCV_IDEAL)
 
 	startTime = time.clock()
 	offset = 0
