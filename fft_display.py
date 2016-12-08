@@ -5,11 +5,12 @@ import sys
 
 def fft_display(img, videoFilename=None):
 	try:
-		img = img.copy()
+		img = img.copy().astype(ipcv.IPCV_64F)
 
 		dims = ipcv.dimensions(img)
 		r,c = dims["rows"],dims["cols"]
-		temp = np.zeros( (r,c) )
+		template = np.zeros( (r,c) ).astype(ipcv.IPCV_64F)
+		temp = template.copy().astype(ipcv.IPCV_128C)
 
 		# generating FFT
 		# FFT = np.fft.fftshift(np.fft.fft(img))
@@ -18,51 +19,61 @@ def fft_display(img, videoFilename=None):
 
 		FFT = np.fft.fft2(img)
 		# print("AVERAGE VALUE IS EQUAL TO:",FFT.flat[0])
-		FFT = np.fft.fftshift( FFT )
-		FFT = np.abs( FFT )
-		logFFT = np.log10( FFT )
-		logFFT = ( logFFT / np.max(logFFT) ) * 255
+		FFTsrc = np.fft.fftshift( FFT )
+		FFT = np.abs( FFTsrc )
+
+		print("FFT MAX IS EQUAL TO:",np.max(FFT))
+		print("FFT MIN IS EQUAL TO:",np.min(FFT))
+
+		logFFT = np.log10( FFT ) 
+
+		# logFFT = FFT
+		logFFT = logFFT - np.min(logFFT)
+		logFFT = (( logFFT / np.max(logFFT) ) * 255).astype(ipcv.IPCV_64F)
 
 
-		print("MAX IS EQUAL TO:",np.max(logFFT))
-		print("MIN IS EQUAL TO:",np.min(logFFT))
 
 
-		# creating array to poulate with maximum values
-		maximumValues = np.flipud( np.argsort( logFFT.flatten() ) )
+		# creating array to populate with maximum value indices
+		sortedArray = np.argsort( FFT.flatten() )
+		maximumIndices = np.flipud( sortedArray )
 
-		used = temp.copy()
-		current = temp.copy()
-		currentScaled = temp.copy()
-		summed = temp.copy()
+		used = template.copy()
+		current = template.copy()
+		currentScaled = template.copy()
+		summed = template.copy()
 		
 		#creating writer and image window
 		cv2.namedWindow(videoFilename)
 		writer = create_video_writer(img.shape,videoFilename)
 
+		avgValue = FFT[0]
 
-		for freqIndex in maximumValues:
+
+
+		for freqIndex in maximumIndices:
 			# puting frequency in 'used' array
 			used.flat[freqIndex] = logFFT.flat[freqIndex]
 
+
 			# returning the spatial sine wave for freq
-			temp.flat[freqIndex] = logFFT.flat[freqIndex]
+			temp.flat[freqIndex] = FFTsrc.flat[freqIndex]
 			current = np.fft.ifft2( temp )
 			temp.flat[freqIndex] = 0
 
-
 			print("MAX IS EQUAL TO:",np.max(current))
 			print("MIN IS EQUAL TO:",np.min(current))
-			
 
 			#scaling the current
-			currentScaled = ( (current - np.min(current) ) / np.max(current) ) * 255
+			c = np.abs(current.real)
+			currentScaled = ( (c - np.min(c) ) )
+			currentScaled = (currentScaled / np.max(currentScaled) ) * 255
 
 			#summing up all the freq
-			summed = summed + current
+			summed = (summed + current)
 
 			#stiching all images together
-			frame = stich(img,logFFT,used,current,currentScaled,summed)
+			frame = stich(img,logFFT,used,np.abs(current.real)+avgValue,currentScaled, np.abs( summed.real ) )
 
 			print("frame dataType =",frame.dtype)
 			#writing frame
@@ -86,6 +97,9 @@ def fft_display(img, videoFilename=None):
 	except Exception as e:
 		ipcv.debug(e)
 
+def get_key(waitTime):
+	pass
+
 def create_video_writer(imgShape,videoFilename):
 	codec = cv2.VideoWriter_fourcc('M', 'P', 'E', 'G')
 	fps = 30
@@ -94,18 +108,11 @@ def create_video_writer(imgShape,videoFilename):
 	writer = cv2.VideoWriter(videoFilename,codec,fps,videoShape,isColor)
 	return writer
 
-def convert_to_argand(fft):
-	mag = np.abs(fft)
-	imag = np.imag(fft)
-	real = np.real(fft)
-	phase = np.atan( imag/real )
-
-
 def stich(img,logFFT,used,current,currentScaled,summed):
 	# stiching together top
 	top = np.hstack( (img,logFFT,used) )
 	# stiching together bottom
-	bottom = np.hstack( (current,currentScaled,summed) )
+	bottom = np.hstack( (summed,current,currentScaled) )
 	# final collage
 	final = np.vstack( (top,bottom) ).astype(ipcv.IPCV_8U)
 	return final
