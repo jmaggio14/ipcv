@@ -73,7 +73,7 @@ def fft_display(img, videoFilename=None):
 			summed = (summed + current)
 
 			#stiching all images together
-			frame = stich(img,logFFT,used,np.abs(current.real)+avgValue,currentScaled, np.abs( summed.real ) )
+			frame = stich(img,logFFT,used,np.abs(current.real),currentScaled, np.abs( summed.real ) )
 
 			print("frame dataType =",frame.dtype)
 			#writing frame
