@@ -1,13 +1,41 @@
 import numpy as np
 import cv2
 from scipy import signal
+import ipcv
 
+def maskBayer(raw,pattern_string="GBRG"):
+    mask_R = np.zeros(raw.shape)
+    mask_B = np.zeros(raw.shape)
 
-def cfaDemosaic(raw,window_size_rb=5,regularization_parameter=.01):
+    if pattern_string == 'GBRG':
+        mask_R[1:mask_R.shape[0]:2,0:mask_R.shape[1]:2] = 1
+        mask_B[0:mask_B.shape[0]:2,1:mask_B.shape[1]:2] = 1
+    elif pattern_string == 'GRBG':
+        mask_R[0:mask_R.shape[0]:2,1:mask_R.shape[1]:2] = 1
+        mask_B[1:mask_B.shape[0]:2,0:mask_B.shape[1]:2] = 1
+    elif pattern_string == 'BGGR':
+        mask_R[1:mask_R.shape[0]:2,1:mask_R.shape[1]:2] = 1
+        mask_B[0:mask_B.shape[0]:2,0:mask_B.shape[1]:2] = 1
+    elif pattern_string == 'RGGB':
+        mask_R[0:mask_R.shape[0]:2,0:mask_R.shape[1]:2] = 1
+        mask_B[1:mask_B.shape[0]:2,1:mask_B.shape[1]:2] = 1
+
+    mask_G = np.ones(raw.shape) - mask_B - mask_R
+
+    R = np.ma.masked_array(raw,mask_R)
+    G = np.ma.masked_array(raw,mask_G)
+    B = np.ma.masked_array(raw,mask_B)
+    rgb_bayer = np.dstack( (R,G,B) )
+    return rgb_bayer
+
+def cfaDemosaic(raw,pattern_string="GBRG",window_size_rb=5,regularization_parameter=.01):
     raw = raw.astype(np.float64)
-    red_band = raw[:,:,0]
-    green_band = raw[:,:,1]
-    blue_band = raw[:,:,2]
+
+    banded_raw = maskBayer(raw,pattern_string)
+
+    red_band = banded_raw[:,:,0]
+    green_band = banded_raw[:,:,1]
+    blue_band = banded_raw[:,:,2]
 
     # --------- GREEN COMPONENT ESTIMATION -------------
 
@@ -37,7 +65,7 @@ def cfaDemosaic(raw,window_size_rb=5,regularization_parameter=.01):
 
     for key,value in diagonal_rolls.items():
         diagnonal_sum = 0
-        for shift,multiplier in value,h8:
+        for shift,multiplier in zip(value,h8):
             diagnonal_sum =  (np.roll(green_band,shift,(0,1)) * multiplier) + diagnonal_sum
         preestimations_R[key] = diagnonal_sum
         preestimations_B[key] = diagnonal_sum
@@ -49,25 +77,25 @@ def cfaDemosaic(raw,window_size_rb=5,regularization_parameter=.01):
     gradient_rolls = {
                     "N":{"G":[ [(-2,-1),(+0,-1)],[(-3,+0),(-1,+0)],[(-2,+1),(+0,+1)] ],
                          "R":[ [(-3,-1),(-1,-1)],[(-3,+1),(-1,+1)] ],
-                         "B":[ [(-2,+0),(+0,+0)] ] }
+                         "B":[ [(-2,+0),(+0,+0)] ] },
                     "S":{"G":[ [(+2,-1),(+0,-1)],[(+3,+0),(+1,+0)],[(+2,+1),(+0,+1)] ],
                          "R":[ [(+3,+1),(+1,-1)],[(+3,+1),(+1,+1)] ],
-                         "B":[ [(+2,+0),(+0,+0)] ] }
+                         "B":[ [(+2,+0),(+0,+0)] ] },
                     "E":{"G":[ [(-1,+2),(-1,+0)],[(+1,+2),(+1,+0)],[(+0,+3),(+0,+1)] ],
                          "R":[ [(-1,+3),(-1,+1)],[(+1,+3),(+1,+1)] ],
-                         "B":[ [(+0,+2),(+0,+0)] ] }
+                         "B":[ [(+0,+2),(+0,+0)] ] },
                     "W":{"G":[ [(-1,-2),(-1,+0)],[(+1,-2),(+1,+0)],[(+0,-3),(+0,-1)] ],
                          "R":[ [(-1,-3),(-1,-1)],[(+1,-3),(+1,-1)] ],
-                         "B":[ [(+0,-2),(+0,+0)] ] }
+                         "B":[ [(+0,-2),(+0,+0)] ] },
                    "NW":{"G":[ [(-2,-1),(-1,+0)],[(-1,+0),(0,+1)],[(-1,-2),(+0,-1)],[(+0,-1),(+1,+0)] ],
                          "R":[ [(-1,-1),(+1,+1)] ],
-                         "B":[ [(-2,-2),(+0,+0)] ] }
+                         "B":[ [(-2,-2),(+0,+0)] ] },
                    "NE":{"G":[ [(-2,+1),(-1,+0)],[(-1,+0),(+0,-1)],[(-1,+2),(+0,+1)],[(+0,+1),(+1,+0)] ],
                          "R":[ [(-1,+1),(+1,-1)] ],
-                         "B":[ [(-2,+2),(+0,+0)] ] }
+                         "B":[ [(-2,+2),(+0,+0)] ] },
                    "SW":{"G":[ [(+1,-2),(+0,-1)],[(+0,-1),(-1,+0)],[(+2,-1),(+1,+0)],[(+1,+0),(+0,+1)] ],
                          "R":[ [(-1,+1),(+1,-1)] ],
-                         "B":[ [(+2,-2),(+0,+0)] ] }
+                         "B":[ [(+2,-2),(+0,+0)] ] },
                    "SE":{"G":[ [(+1,+2),(+0,+1)],[(+0,+1),(-1,+0)],[(+2,+1),(+1,+0)],[(+1,+0),(+0,-1)] ],
                          "R":[ [(+1,+1),(-1,-1)] ],
                          "B":[ [(+2,+2),(+0,+0)] ]}
@@ -77,7 +105,8 @@ def cfaDemosaic(raw,window_size_rb=5,regularization_parameter=.01):
     for direction,pixel_pairs_by_band in gradient_rolls.items():
         gradient = 0;
         for band,pixel_pairs in pixel_pairs_by_band.items():
-            gradient = gradient + np.abs( np.roll(bands[band],pixel_pairs[0],(0,1)) - np.roll(bands[band],pixel_pairs[1],(0,1)) )
+            for shift_set in pixel_pairs:
+                gradient = gradient + np.abs( np.roll(bands[band],shift_set[0],(0,1)) - np.roll(bands[band],shift_set[1],(0,1)) )
         gradient += epsilon
         weights[direction] = 1.0 / gradient
 
@@ -85,8 +114,8 @@ def cfaDemosaic(raw,window_size_rb=5,regularization_parameter=.01):
     green_estimation_R = 0
     weight_sum = 0
     for direction in gradient_rolls.keys():
-        green_estimation_B = green_estimation + (preestimations_B[direction] * weights[direction])
-        green_estimation_R = green_estimation + (preestimations_R[direction] * weights[direction])
+        green_estimation_B = green_estimation_B + (preestimations_B[direction] * weights[direction])
+        green_estimation_R = green_estimation_R + (preestimations_R[direction] * weights[direction])
         weight_sum = weight_sum + weights[direction]
 
     green_estimation_R = (green_estimation_R / weight_sum)
@@ -99,13 +128,13 @@ def cfaDemosaic(raw,window_size_rb=5,regularization_parameter=.01):
     window_coefficient = 1.0 / (window_size_rb **2)
     summation_kernel = np.ones( (window_size_rb,window_size_rb) )
     average_kernel = window_coefficient * np.ones( (window_size_rb,window_size_rb) )
-    local_average_G = signal.convolve2d(green_estimation,average_kernel)
-    local_average_Gsquared = signal.convolve2d(green_estimation**2,average_kernel)
-    local_stddev_G = (1.0 / (window_size_rb**2 - 1) ) * (local_average_Gsquared - (local_average_G**2 * window_coefficient )
+    local_average_G = signal.convolve2d(green_estimation,average_kernel,mode="same")
+    local_average_Gsquared = signal.convolve2d(green_estimation**2,average_kernel,mode="same")
+    local_stddev_G = (1.0 / (window_size_rb**2 - 1) ) * (local_average_Gsquared - (local_average_G**2 * window_coefficient ))
 
     # calculating R
-    local_average_R = signal.convolve2d(green_estimation,average_kernel)
-    a_numerator_R = (window_coefficient * signal.convolve2d( (green_estimation*red_band),summation_kernel) ) - (local_average_G * local_average_R)
+    local_average_R = signal.convolve2d(green_estimation,average_kernel,mode="same")
+    a_numerator_R = (window_coefficient * signal.convolve2d((green_estimation*red_band),summation_kernel, mode="same" )) - (local_average_G * local_average_R)
     a_denominator_R = local_stddev_G + regularization_parameter
     a_R = a_numerator_R / a_numerator_R
     b_R = local_average_R - (a_R * local_average_G)
@@ -114,8 +143,8 @@ def cfaDemosaic(raw,window_size_rb=5,regularization_parameter=.01):
 
 
     # calculating B
-    local_average_B = signal.convolve2d(green_estimation,average_kernel)
-    a_numerator_B = (window_coefficient * signal.convolve2d( (green_estimation*blue_band),summation_kernel) ) - (local_average_G * local_average_B)
+    local_average_B = signal.convolve2d(green_estimation,average_kernel,mode="same")
+    a_numerator_B = (window_coefficient * signal.convolve2d( (green_estimation*blue_band),summation_kernel,mode="same") ) - (local_average_G * local_average_B)
     a_denominator_B = local_stddev_G + regularization_parameter
     a_B = a_numerator_B / a_numerator_B
     b_B = local_average_B - (a_B * local_average_G)
@@ -132,14 +161,21 @@ def cfaDemosaic(raw,window_size_rb=5,regularization_parameter=.01):
 
 
 
-    red_estimation = R_approx + residual
-    blue_estimation = B_approx + residual
+    red_estimation = R_approx + residual_R
+    blue_estimation = B_approx + residual_B
+
+    res = np.dstack( (red_estimation,green_estimation,blue_estimation) ).astype(np.uint8)
+    return res
 
 
 
 
 
+if __name__ == "__main__":
+    # viewer = ipcv.ImageViewer('cfaDemosaic test')
+    raw = cv2.imread("/home/jeff/src/python/ipcv/test_data/demosaickTest.bayer.tif",cv2.IMREAD_UNCHANGED)
+    out = cfaDemosaic(raw)
 
-
-
+    ipcv.quickImageView(out)
+    # viewer.view(out)
 # END
